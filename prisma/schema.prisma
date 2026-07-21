@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// DATABASE_URL: conexão pooled do Neon (usada em runtime pela aplicação).
+// DIRECT_URL: conexão direta/não-pooled do Neon (usada só por `prisma migrate`).
+// Ver .harness/patterns/troubleshooting.md — "Too many connections" no Postgres via Vercel.
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senhaHash String? // scrypt "salt:hash" em hex — nunca texto puro. null = aguardando primeiro acesso (ver ADR-002).
+  xpTotal   Int      @default(0)
+  nivel     Int      @default(1) // = número de módulos completados
+  criadoEm  DateTime @default(now())
+
+  xpPorMateria   XpMateria[]
+  notas          Nota[]
+  progressoAulas ProgressoAula[]
+}
+
+model Modulo {
+  id     String @id @default(cuid())
+  nome   String // ex: "Matemática"
+  ordem  Int // ordem de exibição (área do ENEM: Linguagens > Matemática > Humanas > Natureza)
+  corHex String // cor de identificação do módulo na UI
+
+  aulas     Aula[]
+  notas     Nota[]
+  xpMateria XpMateria[]
+  provas    Prova[]
+}
+
+model Aula {
+  id           String @id @default(cuid())
+  moduloId     String
+  titulo       String
+  youtubeUrl   String
+  canalOrigem  String // "Curso Enem Gratuito" | "ProEnem"
+  ordem        Int
+  xpRecompensa Int    @default(10) // fixo por aula
+
+  modulo         Modulo          @relation(fields: [moduloId], references: [id])
+  notas          Nota[]
+  progressoAulas ProgressoAula[]
+
+  @@unique([moduloId, youtubeUrl])
+}
+
+model ProgressoAula {
+  id          String    @id @default(cuid())
+  usuarioId   String
+  aulaId      String
+  concluida   Boolean   @default(false)
+  concluidaEm DateTime?
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  aula    Aula    @relation(fields: [aulaId], references: [id])
+
+  @@unique([usuarioId, aulaId])
+}
+
+model XpMateria {
+  id        String @id @default(cuid())
+  usuarioId String
+  moduloId  String
+  xp        Int    @default(0)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  modulo  Modulo  @relation(fields: [moduloId], references: [id])
+
+  @@unique([usuarioId, moduloId])
+}
+
+// Regra de negócio obrigatória (não expressa no schema — ver migration):
+// exatamente um de moduloId ou aulaId preenchido, nunca os dois, nunca nenhum.
+// Validado em duas camadas: Zod na API + CHECK constraint SQL (nota_referencia_exclusiva).
+// Ver .harness/boundaries.md — nunca remover uma camada assumindo que a outra basta.
+model Nota {
+  id           String   @id @default(cuid())
+  usuarioId    String
+  moduloId     String?
+  aulaId       String?
+  conteudo     String // markdown
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  modulo  Modulo? @relation(fields: [moduloId], references: [id])
+  aula    Aula?   @relation(fields: [aulaId], references: [id])
+
+  @@index([usuarioId])
+  @@index([moduloId])
+  @@index([aulaId])
+}
+
+// Uma Prova por Modulo (ver ADR-003) — o read-side (modulo-detalhe.api.ts)
+// já assume isso com um findFirst sem orderBy.
+model Prova {
+  id       String    @id @default(cuid())
+  moduloId String
+  questoes Questao[]
+
+  modulo Modulo @relation(fields: [moduloId], references: [id])
+
+  @@unique([moduloId])
+}
+
+// Regra obrigatória (ver migration): fonte = "LLM" só pode existir com
+// validadaDouble = true — CHECK constraint espelha a mesma dupla camada
+// (Zod + SQL) já usada em Nota. Ver .harness/boundaries.md e ADR-003.
+model Questao {
+  id             String  @id @default(cuid())
+  provaId        String
+  fonte          String // "INEP" | "LLM"
+  enunciado      String
+  alternativas   Json // array de { letra, texto }
+  gabarito       String // letra correta
+  validadaDouble Boolean @default(false) // true se passou no double-check (fonte LLM)
+
+  prova Prova @relation(fields: [provaId], references: [id])
+
+  @@index([provaId])
+}

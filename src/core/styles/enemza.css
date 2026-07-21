@@ -1,0 +1,114 @@
+/*
+ * ENEMZA.CSS — tema/identidade visual do produto.
+ * Ver .harness/context.md, seção Design system/UI: dark mode padrão, light
+ * mode alternável; direção jovem/gamificada (referência Duolingo); preto
+ * noite + amarelo de destaque (XP/CTA); cores de módulo são por-dado
+ * (Modulo.corHex), não fixas aqui.
+ *
+ * :root = tokens light, .dark = tokens dark — mesma convenção do kami/shadcn
+ * (dark: dos componentes vendorizados funciona sem adaptação). O produto
+ * ainda assim é dark-first: layout.tsx aplica className="dark" no <html>
+ * por padrão; o toggle de tema remove/adiciona essa classe.
+ */
+
+:root {
+  --radius: 1rem; /* cantos mais arredondados — tom gamificado/Duolingo */
+
+  --background: #faf9f5;
+  --foreground: #17171c;
+  --card: #ffffff;
+  --card-foreground: #17171c;
+  --popover: #ffffff;
+  --popover-foreground: #17171c;
+  --primary: #e8a400; /* amarelo aprofundado — contraste em fundo claro */
+  --primary-foreground: #17171c;
+  --secondary: #eeede6;
+  --secondary-foreground: #17171c;
+  --muted: #f0efe8;
+  --muted-foreground: #6b6b76;
+  --accent: #fdf0d2;
+  --accent-foreground: #8a5a00;
+  --destructive: #dc2626;
+  --border: #e3e2d8;
+  --input: #e3e2d8;
+  --ring: #e8a400;
+
+  --chart-1: #e8a400;
+  --chart-2: #3f6fd6;
+  --chart-3: #8a3ff0;
+  --chart-4: #16a34a;
+  --chart-5: #dc2626;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #17171c;
+  --sidebar-primary: #e8a400;
+  --sidebar-primary-foreground: #17171c;
+  --sidebar-accent: #fdf0d2;
+  --sidebar-accent-foreground: #8a5a00;
+  --sidebar-border: #e3e2d8;
+  --sidebar-ring: #e8a400;
+}
+
+.dark {
+  --background: #0b0b10; /* preto noite */
+  --foreground: #f2f2f5;
+  --card: #16161f;
+  --card-foreground: #f2f2f5;
+  --popover: #16161f;
+  --popover-foreground: #f2f2f5;
+  --primary: #ffc93c; /* amarelo — XP, conquista, CTA principal */
+  --primary-foreground: #14141a;
+  --secondary: #22222d;
+  --secondary-foreground: #f2f2f5;
+  --muted: #1b1b24;
+  --muted-foreground: #9b9ba8;
+  --accent: #2a2a37;
+  --accent-foreground: #ffc93c;
+  --destructive: #ef4444;
+  --border: #26262f;
+  --input: #26262f;
+  --ring: #ffc93c;
+
+  --chart-1: #ffc93c;
+  --chart-2: #5b8def;
+  --chart-3: #a462f5;
+  --chart-4: #4ade80;
+  --chart-5: #f56565;
+
+  --sidebar: #101018; /* base do bottom nav */
+  --sidebar-foreground: #f2f2f5;
+  --sidebar-primary: #ffc93c;
+  --sidebar-primary-foreground: #14141a;
+  --sidebar-accent: #22222d;
+  --sidebar-accent-foreground: #ffc93c;
+  --sidebar-border: #26262f;
+  --sidebar-ring: #ffc93c;
+}
+
+/*
+ * PELE — por data-slot, não edita os .tsx dos componentes base (preserva
+ * `shadcn add --diff/--overwrite`, mesma regra do kami).
+ */
+@layer components {
+  /* Botões: peso alto + press físico — feedback de conquista tátil */
+  [data-slot="button"] {
+    font-weight: 800;
+    transition-duration: 120ms;
+  }
+  [data-slot="button"]:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  [data-slot="badge"] {
+    border-radius: 100px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  /* ZERO SOMBRAS + borda 1px fazem a profundidade, cards bem arredondados */
+  [data-slot="card"] {
+    border-radius: var(--radius-xl);
+    box-shadow: none;
+  }
+}
