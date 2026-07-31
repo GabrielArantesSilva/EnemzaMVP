@@ -49,5 +49,8 @@ next-env.d.ts
 # pipeline de conteúdo — artefatos intermediários regeneráveis (ver ADR-003)
 /scripts/output/
 
+# estado interno de runtime do Claude Code — não é config compartilhada do time
+/.claude/scheduled_tasks.lock
+
 .vercel
 .env*
