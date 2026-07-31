@@ -107,3 +107,35 @@ export async function listarVideosCandidatos(handle: string): Promise<VideoCandi
     duracaoSegundos: estatisticas.get(item.videoId)?.duracaoSegundos ?? 0,
   }));
 }
+
+// Complementa listarVideosCandidatos quando a curadoria por canal fica estreita (ver TD-0014).
+export async function listarVideosPorBusca(query: string, maxResultados = 25): Promise<VideoCandidato[]> {
+  const dados = await chamarApi<{
+    items: { id: { videoId: string }; snippet: { title: string; publishedAt: string } }[];
+  }>("search", {
+    part: "snippet",
+    q: query,
+    type: "video",
+    order: "viewCount",
+    videoDuration: "medium",
+    maxResults: String(maxResultados),
+  });
+
+  const itens = dados.items
+    .filter((item) => item.id.videoId)
+    .map((item) => ({
+      videoId: item.id.videoId,
+      titulo: item.snippet.title,
+      publicadoEm: item.snippet.publishedAt,
+    }));
+
+  const estatisticas = await buscarEstatisticas(itens.map((item) => item.videoId));
+
+  return itens.map((item) => ({
+    videoId: item.videoId,
+    titulo: item.titulo,
+    publicadoEm: item.publicadoEm,
+    viewCount: estatisticas.get(item.videoId)?.viewCount ?? 0,
+    duracaoSegundos: estatisticas.get(item.videoId)?.duracaoSegundos ?? 0,
+  }));
+}

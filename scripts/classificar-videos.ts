@@ -27,6 +27,11 @@ interface VideoClassificado {
 const CANAIS: Record<string, string> = {
   CursoEnemGratuito: "Curso Enem Gratuito",
   ProENEMOficial: "ProEnem",
+  BuscaPortuguesGramatica: "Busca: gramática Enem",
+  BuscaPortuguesInterpretacao: "Busca: interpretação de texto Enem",
+  BuscaLiteraturaEnem: "Busca: literatura brasileira Enem",
+  BuscaIngles: "Busca: aula de inglês Enem",
+  BuscaInglesInterpretacao: "Busca: interpretação de texto em inglês Enem",
 };
 
 const MODULOS = [

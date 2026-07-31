@@ -35,6 +35,33 @@ async function main() {
     }
 
     const selecionados = [...videos].sort((a, b) => b.viewCount - a.viewCount).slice(0, VIDEOS_POR_MODULO);
+    const urlsSelecionadas = new Set(
+      selecionados.map((video) => `https://www.youtube.com/watch?v=${video.videoId}`),
+    );
+
+    const existentes = await prisma.aula.findMany({
+      where: { moduloId: modulo.id },
+      select: { id: true, youtubeUrl: true, _count: { select: { progressoAulas: true, notas: true } } },
+    });
+
+    const orfasSemDependente = existentes.filter(
+      (aula) =>
+        !urlsSelecionadas.has(aula.youtubeUrl) &&
+        aula._count.progressoAulas === 0 &&
+        aula._count.notas === 0,
+    );
+    if (orfasSemDependente.length > 0) {
+      await prisma.aula.deleteMany({ where: { id: { in: orfasSemDependente.map((aula) => aula.id) } } });
+    }
+
+    const orfasComDependente = existentes.filter(
+      (aula) => !urlsSelecionadas.has(aula.youtubeUrl) && !orfasSemDependente.includes(aula),
+    );
+    if (orfasComDependente.length > 0) {
+      console.warn(
+        `${moduloNome}: ${orfasComDependente.length} aula(s) fora da seleção atual mantida(s) por ter progresso/nota de usuário vinculado.`,
+      );
+    }
 
     for (const [indice, video] of selecionados.entries()) {
       const youtubeUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
@@ -51,7 +78,9 @@ async function main() {
       });
     }
 
-    console.log(`${moduloNome}: ${selecionados.length} aula(s) upsertada(s).`);
+    console.log(
+      `${moduloNome}: ${selecionados.length} aula(s) upsertada(s), ${orfasSemDependente.length} órfã(s) removida(s).`,
+    );
   }
 
   console.log("Persistência de aulas concluída.");
