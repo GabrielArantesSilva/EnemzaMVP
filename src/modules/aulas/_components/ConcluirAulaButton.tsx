@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Check } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 import { Button } from "@/core/components/ui/button";
 import { concluirAula } from "../aulas.actions";
@@ -19,6 +20,7 @@ export function ConcluirAulaButton({
 }: ConcluirAulaButtonProps) {
   const [concluida, setConcluida] = useState(concluidaInicialmente);
   const [pendente, iniciarTransicao] = useTransition();
+  const posthog = usePostHog();
 
   if (concluida) {
     return (
@@ -36,6 +38,7 @@ export function ConcluirAulaButton({
         iniciarTransicao(async () => {
           await concluirAula(aulaId);
           setConcluida(true);
+          posthog.capture("aula_concluida", { aulaId, xpRecompensa });
         })
       }
     >

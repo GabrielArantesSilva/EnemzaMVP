@@ -4,6 +4,8 @@ import "@/core/styles/globals.css";
 
 import { ThemeProvider } from "@/core/components/theme-provider";
 import { AppChrome } from "@/core/components/app-chrome";
+import { AnalyticsProvider } from "@/core/components/analytics-provider";
+import { getUsuarioIdSeAutenticado } from "@/lib/auth";
 
 const fontSans = Nunito({
   variable: "--font-sans-app",
@@ -20,11 +22,13 @@ export const metadata: Metadata = {
   description: "Estudo gamificado para o ENEM — videoaulas, provas e anotações.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const usuarioId = await getUsuarioIdSeAutenticado();
+
   return (
     <html
       lang="pt-BR"
@@ -32,9 +36,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased">
-        <ThemeProvider>
-          <AppChrome>{children}</AppChrome>
-        </ThemeProvider>
+        <AnalyticsProvider usuarioId={usuarioId}>
+          <ThemeProvider>
+            <AppChrome>{children}</AppChrome>
+          </ThemeProvider>
+        </AnalyticsProvider>
       </body>
     </html>
   );

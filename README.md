@@ -28,6 +28,9 @@ HMAC, ver ADR-001) · Kiwify (checkout + webhook, ver ADR-002) · Gemini
      `EMAIL_REMETENTE`/`APP_URL`: só necessários pro fluxo de venda
      (webhook Kiwify → e-mail de primeiro acesso). Sem eles, o app roda
      normalmente, só o botão de venda em `/cadastro` mostra um aviso.
+   - `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST`: analytics de
+     produto (PostHog Cloud, região EU). Opcional — sem a key, o app roda
+     normal sem trackear nada.
 3. `pnpm prisma:generate`
 4. `pnpm prisma:migrate` (aplica as migrations no Neon)
 5. `pnpm exec tsx prisma/seed.ts` (cria os 11 módulos + usuário demo —
