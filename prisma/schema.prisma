@@ -26,6 +26,7 @@ model Usuario {
   xpPorMateria   XpMateria[]
   notas          Nota[]
   progressoAulas ProgressoAula[]
+  emailsPrimeiroAcesso EmailPrimeiroAcesso[]
 }
 
 model Modulo {
@@ -130,4 +131,23 @@ model Questao {
   prova Prova @relation(fields: [provaId], references: [id])
 
   @@index([provaId])
+}
+
+// Outbox do e-mail de primeiro acesso (ver ADR-002 amendment 2026-08-05 e
+// TD-0010): o webhook da Kiwify registra aqui antes de tentar enviar e
+// responde 2xx sempre; um dreno reenvia os 'pendente' vencidos com backoff
+// exponencial e encaminha pra DLQ (status 'falhou') após o teto. Um registro
+// por usuário (único caminho de acesso pago). Status validado em duas camadas
+// (Zod + CHECK constraint) — ver .harness/boundaries.md.
+model EmailPrimeiroAcesso {
+  id                 String    @id @default(cuid())
+  usuarioId          String    @unique
+  status             String    @default("pendente") // 'pendente' | 'enviado' | 'falhou'
+  tentativas         Int       @default(0)
+  proximaTentativaEm DateTime  @default(now())
+  ultimoErro         String?
+  criadoEm           DateTime  @default(now())
+  atualizadoEm       DateTime  @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 }

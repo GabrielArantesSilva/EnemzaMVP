@@ -1,24 +1,33 @@
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
-import { criarToken } from "@/lib/token";
-import { enviarEmail } from "@/lib/email";
-
-const DURACAO_PRIMEIRO_ACESSO_MS = 1000 * 60 * 60 * 24 * 7; // 7 dias
+import { garantirEmailPrimeiroAcesso } from "./email-primeiro-acesso";
 
 // Payload sem schema oficial documentado pela Kiwify — ver ADR-002.
 const PayloadKiwifySchema = z.object({
+  // Filtragem por evento é feita no painel da Kiwify ao criar o webhook, mas
+  // revalidar aqui é a rede de segurança contra um evento errado (ex: compra
+  // recusada) chegar — descartado com 2xx, nunca lança (evita retry infinito).
+  webhook_event_type: z.string().optional(),
   Customer: z.object({
     full_name: z.string().trim().min(1),
     email: z.string().trim().toLowerCase().email(),
   }),
 });
 
-// A filtragem por evento ("compra aprovada") é feita no próprio painel da
-// Kiwify ao criar o webhook — este endpoint não tenta re-validar o status do
-// pedido, já que a Kiwify não documenta os valores possíveis desse campo.
+export const EVENTO_COMPRA_APROVADA = "compra_aprovada";
+
+// Só "compra aprovada" gera acesso. Outros eventos são reconhecidos e
+// descartados (2xx) — falha de envio de e-mail também não lança: vira estado
+// no outbox pra reenviar depois (ver email-primeiro-acesso.ts e TD-0010).
 export async function processarCompraAprovada(payloadBruto: unknown): Promise<void> {
-  const { Customer } = PayloadKiwifySchema.parse(payloadBruto);
+  const payload = PayloadKiwifySchema.parse(payloadBruto);
+
+  if (payload.webhook_event_type && payload.webhook_event_type !== EVENTO_COMPRA_APROVADA) {
+    return;
+  }
+
+  const { Customer } = payload;
 
   const existente = await prisma.usuario.findUnique({
     where: { email: Customer.email },
@@ -27,7 +36,7 @@ export async function processarCompraAprovada(payloadBruto: unknown): Promise<vo
 
   if (existente) {
     if (existente.senhaHash === null) {
-      await enviarEmailPrimeiroAcesso(existente.id, Customer.email);
+      await garantirEmailPrimeiroAcesso(existente.id);
     }
     return;
   }
@@ -37,16 +46,5 @@ export async function processarCompraAprovada(payloadBruto: unknown): Promise<vo
     select: { id: true },
   });
 
-  await enviarEmailPrimeiroAcesso(usuario.id, Customer.email);
-}
-
-async function enviarEmailPrimeiroAcesso(usuarioId: string, email: string): Promise<void> {
-  const token = criarToken(usuarioId, "primeiro_acesso", DURACAO_PRIMEIRO_ACESSO_MS);
-  const url = `${process.env.APP_URL}/primeiro-acesso?token=${token}`;
-
-  await enviarEmail({
-    para: email,
-    assunto: "Seu acesso ao Enemza está liberado",
-    html: `<p>Sua compra foi aprovada! Defina sua senha pra acessar o Enemza:</p><p><a href="${url}">${url}</a></p>`,
-  });
+  await garantirEmailPrimeiroAcesso(usuario.id);
 }

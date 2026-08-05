@@ -4,6 +4,7 @@ let contador = 0;
 
 export async function limparBanco() {
   await prisma.$transaction([
+    prisma.emailPrimeiroAcesso.deleteMany(),
     prisma.questao.deleteMany(),
     prisma.prova.deleteMany(),
     prisma.nota.deleteMany(),

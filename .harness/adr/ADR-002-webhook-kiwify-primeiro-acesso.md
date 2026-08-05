@@ -108,3 +108,31 @@ por conta, bem acima do volume esperado do MVP) e deliverability um pouco
 mais sujeita a spam-filtering do que um domínio próprio autenticado — ver
 `.harness/tech-debt/log.md` (TD-0010, atualizado). Reavaliar Resend (ou
 outro provider) quando houver domínio próprio verificado.
+
+## Amendment — 2026-08-05: outbox de e-mail de primeiro acesso (TD-0010)
+
+Antes, o envio do e-mail era inline no webhook: falhou o SMTP e a conta
+ficava criada **sem** e-mail e **sem** registro de tentativa — o comprador
+pagou e nunca recebeu o link. Agora todo envio passa por um outbox:
+
+- **Tabela nova `EmailPrimeiroAcesso`** (1 registro por usuário): `status`
+  (`pendente`/`enviado`/`falhou`), `tentativas`, `proximaTentativaEm`,
+  `ultimoErro`. Status validado em duas camadas (Zod + `CHECK` constraint
+  `email_primeiro_acesso_status_valido`), seguindo a filosofia de
+  `.harness/boundaries.md`.
+- **Webhook**: valida `webhook_event_type` (`compra_aprovada`) — eventos
+  diferentes são reconhecidos e descartados com 2xx (rede de segurança além
+  do filtro no painel da Kiwify). Registra o outbox, tenta enviar 1x e
+  **responde 2xx sempre**; falha de e-mail não lança mais 500. Payload fora
+  do schema retorna 400 (erro permanente — a Kiwify para de retentar); erro
+  transitório (banco) segue 500 e a Kiwify reenvia.
+- **Dreno**: reenvia os `pendente` vencidos com backoff exponencial
+  (1, 2, 4... min, teto 2^8) até `MAX_TENTATIVAS = 5`, quando vira DLQ
+  (`falhou`), retomada só por novo evento de webhook. O dreno roda no
+  próprio webhook (self-healing, funciona no plano gratuito da Vercel) e na
+  rota `/api/cron/reenviar-emails` (Vercel Cron, `vercel.json` — só executa
+  no plano Pro; protegida por `CRON_SECRET`).
+- **Idempotência**: a mensagem da Kiwify reenviada tem `id` que muda a cada
+  retry, então a deduplicação é por `usuarioId`/e-mail (upsert do usuário +
+  outbox único), não pelo `id` do payload.
+
