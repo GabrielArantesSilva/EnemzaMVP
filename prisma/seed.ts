@@ -10,7 +10,10 @@ const SENHA_DEMO = "dev12345";
 // Ordem de exibição segue a área do ENEM: Linguagens > Matemática > Humanas > Natureza.
 // Ver .harness/domain-glossary.md e .harness/context.md.
 const MODULOS = [
-  { nome: "Português", ordem: 1, corHex: "#5B8DEF" },
+  // Português usa o azul oficial do ENEM (#005CA9) — com a identidade puxada
+  // pro azul (ver .harness/context.md), o tom médio #5B8DEF anterior colidia
+  // com a cor principal; o azul profundo destoa do CTA claro.
+  { nome: "Português", ordem: 1, corHex: "#005CA9" },
   { nome: "Literatura", ordem: 2, corHex: "#A462F5" },
   { nome: "Inglês", ordem: 3, corHex: "#F56AAE" },
   { nome: "Matemática", ordem: 4, corHex: "#34D399" },

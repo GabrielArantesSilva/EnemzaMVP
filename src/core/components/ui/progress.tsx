@@ -9,7 +9,7 @@ function Progress({
   indicatorColor,
   ...props
 }: React.ComponentProps<typeof ProgressPrimitive.Root> & {
-  /** Cor do preenchimento — ex: cor fixa de um Modulo. Default: bg-primary (amarelo). */
+  /** Cor do preenchimento — ex: cor fixa de um Modulo. Default: bg-primary (azul). */
   indicatorColor?: string;
 }) {
   return (

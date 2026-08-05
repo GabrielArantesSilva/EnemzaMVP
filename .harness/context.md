@@ -79,8 +79,10 @@ como um todo.
 - Direção visual: jovem e gamificado (referência Duolingo) — cores
   vibrantes, feedback visual de conquista, tipografia arredondada (Nunito,
   Baloo).
-- Paleta: preto noite (fundo dark), amarelo (destaque/XP/CTA), azul/roxo/
-  outras cores de apoio (identificação fixa de cada um dos 11 módulos).
+- Paleta (azul do ENEM como identidade): azul-noite (fundo dark), azul como
+  cor principal/CTA, amarelo como accent de XP/conquista, e as demais cores
+  de apoio como identificação fixa de cada um dos 11 módulos (ver
+  `src/core/styles/enemza.css`).
 - Navegação: bottom nav fixo, mobile-first — Início, Anotações, Perfil.
 
 ## Compliance
