@@ -30,7 +30,7 @@ export function SidebarNav() {
                 className={cn(
                   "flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-bold transition-colors",
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
                     : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50",
                 )}
                 aria-current={isActive ? "page" : undefined}

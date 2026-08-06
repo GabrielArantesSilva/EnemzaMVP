@@ -29,7 +29,7 @@ export function BottomNav() {
                   className={cn(
                     "flex size-9 items-center justify-center rounded-full transition-colors",
                     isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
                       : "text-sidebar-foreground/50",
                   )}
                 >
@@ -37,7 +37,7 @@ export function BottomNav() {
                 </span>
                 <span
                   className={cn(
-                    isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/50",
+                    isActive ? "text-sidebar-primary" : "text-sidebar-foreground/50",
                   )}
                 >
                   {label}
