@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { submeterProva } from "@/modules/provas/provas.actions";
 import { prisma } from "@/lib/prisma";
-import { limparBanco } from "@test/db-utils";
+import { abrirSessao, encerrarSessao } from "@/lib/sessao";
+import { criarUsuario, limparBanco } from "@test/db-utils";
 
 describe("submeterProva — correção", () => {
+  let usuarioId: string;
   let provaId: string;
   let questaoCertaId: string;
   let questaoErradaId: string;
@@ -12,6 +14,7 @@ describe("submeterProva — correção", () => {
   beforeEach(async () => {
     await limparBanco();
 
+    const usuario = await criarUsuario();
     const modulo = await prisma.modulo.create({
       data: { nome: "Módulo Teste", ordem: 1, corHex: "#000000" },
     });
@@ -41,9 +44,18 @@ describe("submeterProva — correção", () => {
       },
     });
 
+    usuarioId = usuario.id;
     provaId = prova.id;
     questaoCertaId = questaoCerta.id;
     questaoErradaId = questaoErrada.id;
+    await abrirSessao(usuarioId);
+  });
+
+  it("rejeita sem sessão válida", async () => {
+    await encerrarSessao();
+    await expect(
+      submeterProva({ provaId, respostas: { [questaoCertaId]: "B" } }),
+    ).rejects.toThrow(/sessão/i);
   });
 
   it("conta acerto quando a resposta bate com o gabarito e erro quando diverge", async () => {
@@ -69,5 +81,20 @@ describe("submeterProva — correção", () => {
     expect(semResposta?.escolhida).toBeNull();
     expect(resultado.acertos).toBe(1);
     expect(resultado.total).toBe(2);
+  });
+
+  it("persiste a tentativa no histórico com acertos e total", async () => {
+    await submeterProva({
+      provaId,
+      respostas: { [questaoCertaId]: "B", [questaoErradaId]: "B" },
+    });
+
+    const historico = await prisma.historicoEstudo.findFirstOrThrow({
+      where: { usuarioId, tipo: "prova" },
+    });
+
+    expect(historico.titulo).toBe("Prova de Módulo Teste");
+    expect(historico.acertos).toBe(1);
+    expect(historico.totalQuestoes).toBe(2);
   });
 });

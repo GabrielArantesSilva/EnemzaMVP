@@ -22,13 +22,17 @@ export async function concluirAula(aulaId: string) {
 
     const aula = await tx.aula.findUniqueOrThrow({
       where: { id: aulaId },
-      select: { moduloId: true, xpRecompensa: true },
+      select: { moduloId: true, xpRecompensa: true, titulo: true },
     });
 
     await tx.progressoAula.upsert({
       where: { usuarioId_aulaId: { usuarioId, aulaId } },
       update: { concluida: true, concluidaEm: new Date() },
       create: { usuarioId, aulaId, concluida: true, concluidaEm: new Date() },
+    });
+
+    await tx.historicoEstudo.create({
+      data: { usuarioId, tipo: "aula", referenciaId: aulaId, titulo: aula.titulo },
     });
 
     await tx.usuario.update({

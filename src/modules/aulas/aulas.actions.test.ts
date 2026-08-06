@@ -64,4 +64,16 @@ describe("concluirAula — XP e nível", () => {
     expect(usuario.xpTotal).toBe(10);
     expect(xpMateria.xp).toBe(10);
   });
+
+  it("grava uma entrada no histórico de estudos ao concluir, sem duplicar em repetição", async () => {
+    await concluirAula(aula1Id);
+    await concluirAula(aula1Id);
+
+    const historicos = await prisma.historicoEstudo.findMany({
+      where: { usuarioId, tipo: "aula" },
+    });
+
+    expect(historicos).toHaveLength(1);
+    expect(historicos[0].titulo).toBe((await prisma.aula.findUniqueOrThrow({ where: { id: aula1Id } })).titulo);
+  });
 });

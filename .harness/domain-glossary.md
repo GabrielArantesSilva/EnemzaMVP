@@ -22,6 +22,11 @@
   número de módulos completados).
 - **XpMateria**: XP acumulado por usuário e por módulo — granularidade
   exibida na tela de Perfil.
+- **HistoricoEstudo**: feed de atividade do usuário — uma linha por aula
+  concluída (`tipo = "aula"`) ou prova submetida (`tipo = "prova"`, com
+  `acertos`/`totalQuestoes`). Alimenta a seção "Histórico de estudos" e as
+  estatísticas do Perfil. `titulo` é snapshot (não é FK): permanece correto
+  se o nome da fonte mudar.
 
 ## Termos de negócio
 

@@ -61,6 +61,17 @@ como um todo.
 - Sem ranking entre usuários — XP e nível são visíveis apenas para o
   próprio usuário.
 
+## Histórico de estudos
+
+- `HistoricoEstudo` registra uma linha por aula concluída (`tipo = "aula"`,
+  gravado em `concluirAula`, só na primeira conclusão) e por prova submetida
+  (`tipo = "prova"`, gravado em `submeterProva` com `acertos`/
+  `totalQuestoes`).
+- Alimenta o Perfil: seção "Histórico de estudos" (últimos 20 eventos) e
+  estatísticas (aulas concluídas, provas feitas, taxa de acerto).
+- `titulo` é snapshot (não é FK): permanece correto se o nome da fonte
+  mudar.
+
 ## Pipeline de geração de provas
 
 - Fonte mista: banco de questões do INEP (domínio público, gabarito

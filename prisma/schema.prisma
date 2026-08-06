@@ -28,6 +28,7 @@ model Usuario {
   notas          Nota[]
   progressoAulas ProgressoAula[]
   emailsPrimeiroAcesso EmailPrimeiroAcesso[]
+  historicoEstudo      HistoricoEstudo[]
 }
 
 model Modulo {
@@ -132,6 +133,25 @@ model Questao {
   prova Prova @relation(fields: [provaId], references: [id])
 
   @@index([provaId])
+}
+
+// Feed de atividade do usuário (ver migration 20260807000000_historico_estudo).
+// tipo = 'aula' | 'prova' (CHECK constraint); para 'prova', acertos/
+// totalQuestoes alimentam a taxa de acerto do Perfil. `titulo` é snapshot —
+// não é FK, então permanece correto se o nome da fonte mudar.
+model HistoricoEstudo {
+  id            String   @id @default(cuid())
+  usuarioId     String
+  tipo          String
+  referenciaId  String? // aulaId ou provaId (link opcional, não é FK)
+  titulo        String
+  acertos       Int?
+  totalQuestoes Int?
+  criadoEm      DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, criadoEm])
 }
 
 // Outbox do e-mail de primeiro acesso (ver ADR-002 amendment 2026-08-05 e
