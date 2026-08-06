@@ -8,7 +8,9 @@ export type XpPorMateria = {
 
 export type PerfilUsuario = {
   nome: string;
+  email: string;
   xpTotal: number;
   nivel: number;
+  planoExpiraEm: Date | null; // null = nunca comprou — ver src/lib/plano.ts
   xpPorMateria: XpPorMateria[];
 };

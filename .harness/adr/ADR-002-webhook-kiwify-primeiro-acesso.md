@@ -136,3 +136,16 @@ pagou e nunca recebeu o link. Agora todo envio passa por um outbox:
   retry, então a deduplicação é por `usuarioId`/e-mail (upsert do usuário +
   outbox único), não pelo `id` do payload.
 
+## Amendment — 2026-08-06: plano pago de 6 meses (`planoExpiraEm`)
+
+O produto vende um plano de 6 meses de acesso. Adicionado
+`Usuario.planoExpiraEm` (migration `20260806000000_usuario_plano_expira_em`):
+a compra aprovada **sempre** renova o plano (novo = agora + 6 meses; recompra
+= `max` entre o vigente e agora + 6 meses, nunca reduz — helpers puros em
+`src/lib/plano.ts`). O Perfil exibe o timer ("Faltam X dias") com barra de
+progresso. Decisões conscientes: "6 meses" aproximado por 180 dias; usuário
+que nunca comprou (ex: demo) tem `planoExpiraEm` null e o app não bloqueia
+acesso por ora (exigir plano ativo em todas as rotas é um passo futuro,
+fora do escopo deste amendment).
+
+

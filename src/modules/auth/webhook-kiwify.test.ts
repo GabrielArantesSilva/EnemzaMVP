@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";
 import { gerarHashSenha } from "@/lib/senha";
+import { DURACAO_PLANO_MS } from "@/lib/plano";
 import { criarUsuario, limparBanco } from "@test/db-utils";
 import { enviarEmail } from "@/lib/email";
 import { processarCompraAprovada } from "@/modules/auth/webhook-kiwify";
@@ -81,6 +82,22 @@ describe("processarCompraAprovada", () => {
     expect(outbox.tentativas).toBe(1);
     expect(outbox.ultimoErro).toContain("smtp fora do ar");
     expect(outbox.proximaTentativaEm.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  it("compra aprovada define o plano de 6 meses; recompra renova sem reduzir", async () => {
+    await processarCompraAprovada(PAYLOAD_COMPRA_APROVADA);
+
+    const usuario = await prisma.usuario.findUniqueOrThrow({ where: { email: "ana@compradora.local" } });
+    expect(usuario.planoExpiraEm).not.toBeNull();
+    const esperado = Date.now() + DURACAO_PLANO_MS;
+    expect(usuario.planoExpiraEm!.getTime()).toBeGreaterThan(esperado - 60_000);
+    expect(usuario.planoExpiraEm!.getTime()).toBeLessThanOrEqual(esperado + 60_000);
+    const primeiro = usuario.planoExpiraEm!.getTime();
+
+    await processarCompraAprovada(PAYLOAD_COMPRA_APROVADA);
+
+    const depois = await prisma.usuario.findUniqueOrThrow({ where: { email: "ana@compradora.local" } });
+    expect(depois.planoExpiraEm!.getTime()).toBeGreaterThanOrEqual(primeiro);
   });
 
   it("rejeita payload sem Customer.email", async () => {

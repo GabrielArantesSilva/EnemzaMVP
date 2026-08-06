@@ -39,7 +39,13 @@ async function main() {
   const usuarioDemo = await prisma.usuario.upsert({
     where: { email: "dev@enemza.local" },
     update: { senhaHash },
-    create: { nome: "Usuário Demo", email: "dev@enemza.local", senhaHash },
+    create: {
+      nome: "Usuário Demo",
+      email: "dev@enemza.local",
+      senhaHash,
+      // Demo já nasce com plano ativo de 6 meses (ver src/lib/plano.ts).
+      planoExpiraEm: new Date(Date.now() + 1000 * 60 * 60 * 24 * 180),
+    },
   });
   console.log(`Usuário demo: ${usuarioDemo.id} (login: dev@enemza.local / ${SENHA_DEMO})`);
 }

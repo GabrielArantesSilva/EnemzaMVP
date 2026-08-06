@@ -22,6 +22,7 @@ model Usuario {
   xpTotal   Int      @default(0)
   nivel     Int      @default(1) // = número de módulos completados
   criadoEm  DateTime @default(now())
+  planoExpiraEm DateTime? // fim do plano pago (6 meses da compra) — null = nunca comprou. Ver src/lib/plano.ts.
 
   xpPorMateria   XpMateria[]
   notas          Nota[]

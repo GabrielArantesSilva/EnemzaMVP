@@ -4,7 +4,7 @@ import type { PerfilUsuario } from "./perfil.types";
 export async function getPerfilUsuario(usuarioId: string): Promise<PerfilUsuario> {
   const usuario = await prisma.usuario.findUniqueOrThrow({
     where: { id: usuarioId },
-    select: { nome: true, xpTotal: true, nivel: true },
+    select: { nome: true, email: true, xpTotal: true, nivel: true, planoExpiraEm: true },
   });
 
   const modulos = await prisma.modulo.findMany({
@@ -28,8 +28,10 @@ export async function getPerfilUsuario(usuarioId: string): Promise<PerfilUsuario
 
   return {
     nome: usuario.nome,
+    email: usuario.email,
     xpTotal: usuario.xpTotal,
     nivel: usuario.nivel,
+    planoExpiraEm: usuario.planoExpiraEm,
     xpPorMateria,
   };
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { calcularPlanoExpiraEm } from "@/lib/plano";
 import { garantirEmailPrimeiroAcesso } from "./email-primeiro-acesso";
 
 // Payload sem schema oficial documentado pela Kiwify — ver ADR-002.
@@ -31,10 +32,16 @@ export async function processarCompraAprovada(payloadBruto: unknown): Promise<vo
 
   const existente = await prisma.usuario.findUnique({
     where: { email: Customer.email },
-    select: { id: true, senhaHash: true },
+    select: { id: true, senhaHash: true, planoExpiraEm: true },
   });
 
   if (existente) {
+    // Toda compra aprovada renova o plano (nunca reduz um vigente) — ver src/lib/plano.ts.
+    await prisma.usuario.update({
+      where: { id: existente.id },
+      data: { planoExpiraEm: calcularPlanoExpiraEm(existente.planoExpiraEm) },
+    });
+
     if (existente.senhaHash === null) {
       await garantirEmailPrimeiroAcesso(existente.id);
     }
@@ -42,7 +49,12 @@ export async function processarCompraAprovada(payloadBruto: unknown): Promise<vo
   }
 
   const usuario = await prisma.usuario.create({
-    data: { nome: Customer.full_name, email: Customer.email, senhaHash: null },
+    data: {
+      nome: Customer.full_name,
+      email: Customer.email,
+      senhaHash: null,
+      planoExpiraEm: calcularPlanoExpiraEm(null),
+    },
     select: { id: true },
   });
 
