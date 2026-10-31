@@ -2,9 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, AlertCircle, Loader2 } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 
-import { Button } from "@/core/components/ui/button";
 import { entrar } from "../auth.actions";
 
 export function LoginForm() {
@@ -24,8 +23,8 @@ export function LoginForm() {
         await entrar({ email, senha });
         router.replace("/");
         router.refresh();
-      } catch (erro) {
-        setErro(erro instanceof Error ? erro.message : "Não foi possível entrar. Tente de novo.");
+      } catch (err) {
+        setErro(err instanceof Error ? err.message : "Não foi possível autenticar. Verifique seus dados.");
       }
     });
   }
@@ -38,36 +37,47 @@ export function LoginForm() {
 
   return (
     <div className="w-full space-y-5">
+      {/* Banner de Demonstração / Portfólio */}
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-blue-900/50 bg-blue-950/30 px-3.5 py-2.5 text-xs text-blue-200">
+        <div className="flex flex-col">
+          <span className="font-semibold text-blue-100">Visitando pelo portfólio?</span>
+          <span className="text-[11px] text-blue-300/80">Use as credenciais de teste para navegar.</span>
+        </div>
+        <button
+          type="button"
+          onClick={preencherDemo}
+          className="shrink-0 rounded-md bg-blue-600/30 px-2.5 py-1 text-xs font-medium text-blue-200 transition-colors hover:bg-blue-600/50 border border-blue-500/30 cursor-pointer"
+        >
+          Inserir dados demo
+        </button>
+      </div>
+
       <form onSubmit={enviar} className="space-y-4">
-        {/* Campo de E-mail */}
+        {/* Campo E-mail */}
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-slate-300">
-            E-mail de Acesso
+          <label htmlFor="email" className="block text-xs font-medium text-slate-300">
+            E-mail
           </label>
-          <div className="relative flex items-center">
-            <Mail className="pointer-events-none absolute left-3.5 size-4.5 text-slate-400" />
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="seu.email@exemplo.com"
-              required
-              value={email}
-              onChange={(evento) => setEmail(evento.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 py-3.5 pl-11 pr-4 text-sm text-white placeholder-slate-500 shadow-inner outline-none transition-all focus:border-blue-500 focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/20"
-            />
-          </div>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="seu@email.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg border border-slate-700/80 bg-slate-900/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
         </div>
 
-        {/* Campo de Senha */}
+        {/* Campo Senha */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="senha" className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Sua Senha
+            <label htmlFor="senha" className="block text-xs font-medium text-slate-300">
+              Senha
             </label>
           </div>
-          <div className="relative flex items-center">
-            <Lock className="pointer-events-none absolute left-3.5 size-4.5 text-slate-400" />
+          <div className="relative">
             <input
               id="senha"
               type={mostrarSenha ? "text" : "password"}
@@ -75,65 +85,47 @@ export function LoginForm() {
               placeholder="••••••••••••"
               required
               value={senha}
-              onChange={(evento) => setSenha(evento.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 py-3.5 pl-11 pr-11 text-sm text-white placeholder-slate-500 shadow-inner outline-none transition-all focus:border-blue-500 focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/20"
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full rounded-lg border border-slate-700/80 bg-slate-900/80 px-3.5 py-2.5 pr-10 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
             <button
               type="button"
               onClick={() => setMostrarSenha(!mostrarSenha)}
-              className="absolute right-3.5 text-slate-400 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
               aria-label={mostrarSenha ? "Ocultar senha" : "Exibir senha"}
             >
-              {mostrarSenha ? <EyeOff className="size-4.5" /> : <Eye className="size-4.5" />}
+              {mostrarSenha ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
         </div>
 
-        {/* Mensagem de Erro */}
+        {/* Erro */}
         {erro && (
-          <div className="flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/15 p-3 text-xs font-semibold text-red-300 animate-in fade-in">
+          <div className="flex items-center gap-2 rounded-lg border border-red-900/50 bg-red-950/40 p-3 text-xs text-red-300">
             <AlertCircle className="size-4 shrink-0 text-red-400" />
             <span>{erro}</span>
           </div>
         )}
 
-        {/* Botão Entrar Principal */}
-        <Button
+        {/* Botão Entrar */}
+        <button
           type="submit"
           disabled={pendente}
-          className="group relative h-12 w-full rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 font-extrabold text-sm text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 font-medium text-sm text-white transition-colors hover:bg-blue-500 active:bg-blue-700 disabled:opacity-60 cursor-pointer shadow-sm"
         >
           {pendente ? (
-            <span className="flex items-center gap-2">
+            <>
               <Loader2 className="size-4 animate-spin" />
-              <span>Entrando no Enemza...</span>
-            </span>
+              <span>Entrando...</span>
+            </>
           ) : (
-            <span className="flex items-center justify-center gap-2">
-              <span>Acessar Plataforma</span>
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </span>
+            <>
+              <span>Entrar na plataforma</span>
+              <ArrowRight className="size-4" />
+            </>
           )}
-        </Button>
+        </button>
       </form>
-
-      {/* Divisor moderno */}
-      <div className="relative flex items-center justify-center py-1">
-        <div className="w-full border-t border-white/10" />
-        <span className="absolute bg-[#0a1128] px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          Acesso para Avaliadores
-        </span>
-      </div>
-
-      {/* Botão Acesso Rápido Portfólio / Demo */}
-      <button
-        type="button"
-        onClick={preencherDemo}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-extrabold text-amber-300 transition-all hover:bg-amber-500/20 hover:border-amber-500/50 cursor-pointer"
-      >
-        <Sparkles className="size-4 text-amber-400" />
-        <span>Preencher com Conta de Demonstração</span>
-      </button>
     </div>
   );
 }
