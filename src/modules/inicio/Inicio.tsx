@@ -1,8 +1,9 @@
 import { PageContainer } from "@/core/components/page-container";
 import { getUsuarioAtual } from "@/lib/auth";
 import { getModulosComProgresso, getResumoUsuario } from "./inicio.api";
-import { ModuloCard } from "./_components/ModuloCard";
 import { ResumoCard } from "./_components/ResumoCard";
+import { PlanoHojeCard } from "./_components/PlanoHojeCard";
+import { ModulosFilterView } from "./_components/ModulosFilterView";
 
 export async function Inicio() {
   const usuario = await getUsuarioAtual();
@@ -12,17 +13,19 @@ export async function Inicio() {
   ]);
 
   return (
-    <PageContainer>
-      <header>
-        <h1 className="font-display text-xl font-extrabold">Enemza</h1>
-      </header>
+    <PageContainer className="max-w-4xl py-6 space-y-6">
+      {/* Resumo do Estudante & Gamificação */}
+      <ResumoCard resumo={resumo} />
 
-      <ResumoCard nivel={resumo.nivel} modulosConcluidos={resumo.modulosConcluidos} />
+      {/* Planejador Diário Inteligente & Pomodoro */}
+      <PlanoHojeCard proximaAula={resumo.proximaAula} />
 
-      <div className="flex flex-col gap-3">
-        {modulos.map((modulo) => (
-          <ModuloCard key={modulo.id} modulo={modulo} />
-        ))}
+      {/* Módulos com Filtros por Área do ENEM e Ordenação TRI */}
+      <div className="space-y-3">
+        <h3 className="font-display text-lg font-extrabold text-white">
+          Disciplinas & Cadernos do ENEM
+        </h3>
+        <ModulosFilterView modulos={modulos} />
       </div>
     </PageContainer>
   );

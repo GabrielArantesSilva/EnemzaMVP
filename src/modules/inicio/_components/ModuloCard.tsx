@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, ChevronRight, Award } from "lucide-react";
 
 import { Progress } from "@/core/components/ui/progress";
 import type { ModuloProgresso } from "../inicio.types";
@@ -19,34 +19,64 @@ export function ModuloCard({ modulo }: ModuloCardProps) {
   return (
     <Link
       href={`/modulos/${modulo.id}`}
-      className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"
+      className="group relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-white/5 bg-slate-900/60 p-4 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-slate-900/90 hover:shadow-lg hover:scale-[1.005]"
     >
-      <span
-        className="flex size-12 shrink-0 items-center justify-center rounded-full"
-        style={{ backgroundColor: `${modulo.corHex}26`, color: modulo.corHex }}
-      >
-        <Icon className="size-6" strokeWidth={2.25} />
-      </span>
+      <div className="flex items-center gap-3.5 w-full sm:w-auto">
+        {/* Ícone com círculo na cor temática */}
+        <span
+          className="flex size-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:scale-105"
+          style={{ backgroundColor: `${modulo.corHex}20`, color: modulo.corHex }}
+        >
+          <Icon className="size-6" strokeWidth={2.25} />
+        </span>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-display font-bold">{modulo.nome}</p>
+        {/* Detalhes do Módulo */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate font-display font-extrabold text-base text-white group-hover:text-blue-300 transition-colors">
+              {modulo.nome}
+            </p>
+            {/* Tag de Incidência TRI */}
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${
+                modulo.incidencia === "Essencial"
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                  : modulo.incidencia === "Alta"
+                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                  : "bg-slate-800 text-slate-400"
+              }`}
+            >
+              {modulo.incidencia}
+            </span>
+          </div>
 
+          <p className="text-xs text-slate-400">
+            Caderno de {modulo.area} • {modulo.totalAulas} {modulo.totalAulas === 1 ? "aula" : "aulas"}
+          </p>
+        </div>
+      </div>
+
+      {/* Progresso & Ação */}
+      <div className="w-full sm:w-48 flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
         {temAulas ? (
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="flex flex-col gap-1 w-full sm:w-36">
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span className="text-slate-400 font-mono text-[11px]">{percentual}%</span>
+              <span className="text-slate-400 text-[11px]">
+                {modulo.aulasConcluidas}/{modulo.totalAulas}
+              </span>
+            </div>
             <Progress
               value={percentual}
               indicatorColor={modulo.corHex}
-              className="h-2 flex-1"
+              className="h-2 w-full bg-slate-800"
             />
-            <span className="shrink-0 text-xs font-semibold text-muted-foreground">
-              {modulo.aulasConcluidas}/{modulo.totalAulas}
-            </span>
           </div>
         ) : (
-          <p className="mt-1 text-xs font-medium text-muted-foreground">
-            Aulas em breve
-          </p>
+          <span className="text-xs text-slate-400 italic">Em breve</span>
         )}
+
+        <ChevronRight className="size-4.5 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-white shrink-0 hidden sm:block" />
       </div>
     </Link>
   );
