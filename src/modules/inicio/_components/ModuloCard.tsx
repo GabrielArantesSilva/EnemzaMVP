@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HelpCircle, ChevronRight, Award } from "lucide-react";
+import { HelpCircle, ChevronRight } from "lucide-react";
 
 import { Progress } from "@/core/components/ui/progress";
 import type { ModuloProgresso } from "../inicio.types";

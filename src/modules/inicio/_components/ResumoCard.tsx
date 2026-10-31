@@ -1,4 +1,4 @@
-import { Flame, Zap, Trophy, GraduationCap, CheckCircle2 } from "lucide-react";
+import { Zap, Trophy, GraduationCap, CheckCircle2 } from "lucide-react";
 import type { ResumoUsuario } from "../inicio.types";
 
 interface ResumoCardProps {

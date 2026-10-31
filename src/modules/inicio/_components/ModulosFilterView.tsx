@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Filter, ArrowUpDown, Lightbulb, Search } from "lucide-react";
+import { Lightbulb, Search } from "lucide-react";
 import type { ModuloProgresso, AreaEnem } from "../inicio.types";
 import { ModuloCard } from "./ModuloCard";
 import { DICAS_DIDATICAS_ENEM } from "../inicio.constants";

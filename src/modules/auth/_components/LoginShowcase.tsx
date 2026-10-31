@@ -9,7 +9,6 @@ import {
   Play,
   Trophy,
   Sparkles,
-  ChevronRight,
   Clock,
   Award,
   Layers,
@@ -360,8 +359,8 @@ export function LoginShowcase() {
                     <div className="rounded-lg bg-slate-950/80 p-2 text-[10px] text-slate-300 border border-white/5 space-y-1">
                       <p className="font-semibold text-amber-400">📌 Ponto Crucial para o ENEM:</p>
                       <p>• Geradores: U = E - r·i</p>
-                      <p>• Receptores: U' = E' + r'·i</p>
-                      <p className="text-slate-400 italic">"Cai todo ano na prova de Natureza!"</p>
+                      <p>• Receptores: U&apos; = E&apos; + r&apos;·i</p>
+                      <p className="text-slate-400 italic">&ldquo;Cai todo ano na prova de Natureza!&rdquo;</p>
                     </div>
                   </div>
                 </div>

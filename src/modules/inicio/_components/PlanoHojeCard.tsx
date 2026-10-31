@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Play, Sparkles, Clock, CheckCircle2, Timer, Zap, ArrowRight, Pause, RotateCcw } from "lucide-react";
+import { Play, Sparkles, Timer, Zap, ArrowRight, Pause, RotateCcw } from "lucide-react";
 import type { ProximaAula } from "../inicio.types";
 
 interface PlanoHojeCardProps {
